@@ -1,11 +1,7 @@
 const Koa = require("koa");
-const { Sequelize } = require("sequelize");
 const cors = require("@koa/cors");
 
-const sequelize = new Sequelize(
-  "postgres://postgres:postgres@localhost:5432/VirtualTable"
-);
-
+const sequelize = require("./db");
 const api = require("./routes");
 
 const app = new Koa();
