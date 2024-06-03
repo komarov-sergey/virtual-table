@@ -3,8 +3,12 @@ const Router = require("koa-router");
 const { getTableMeta, getTableData } = require("./table.service");
 
 module.exports = new Router()
-  .post("/meta", async (ctx) => {
-    const metaOrError = await getTableMeta();
+  .post("/meta/:tableId", async (ctx) => {
+    const {
+      request: { params: tableId },
+    } = ctx;
+
+    const metaOrError = await getTableMeta(tableId);
 
     if (!Object.keys(metaOrError).includes("errors")) {
       ctx.response.status = 200;
@@ -14,8 +18,12 @@ module.exports = new Router()
       ctx.body = metaOrError;
     }
   })
-  .post("/data", async (ctx) => {
-    const dataOrError = await getTableData();
+  .post("/data/:tableId", async (ctx) => {
+    const {
+      request: { params: tableId },
+    } = ctx;
+
+    const dataOrError = await getTableData(tableId);
 
     if (!Object.keys(dataOrError).includes("errors")) {
       ctx.response.status = 200;
