@@ -5,7 +5,7 @@
 -- Dumped from database version 13.4
 -- Dumped by pg_dump version 16.2
 
--- Started on 2024-06-03 12:50:26 MSK
+-- Started on 2024-06-03 17:00:53 MSK
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -84,8 +84,8 @@ ALTER TABLE public.table_meta OWNER TO postgres;
 INSERT INTO public.table_data VALUES ('37507a3b-e362-4842-8304-40276c3dea80', '2024-05-31 11:41:06.814167', '2024-05-31 11:41:06.814167', 'admin', '{"age": 32, "name": "John Brown", "address": "New York No. 1 Lake Park"}', '1');
 INSERT INTO public.table_data VALUES ('37507a3b-e362-4842-8304-40276c3dea81', '2024-05-31 11:41:06.814167', '2024-05-31 11:41:06.814167', 'admin', '{"age": 42, "name": "Jim Green", "address": "London No. 1 Lake Park"}', '1');
 INSERT INTO public.table_data VALUES ('37507a3b-e362-4842-8304-40276c3dea82', '2024-05-31 11:41:06.814167', '2024-05-31 11:41:06.814167', 'admin', '{"age": 32, "name": "Joe Black", "address": "Sydney No. 1 Lake Park"}', '1');
-INSERT INTO public.table_data VALUES ('37507a3b-e362-4842-8304-40276c3dea83', '2024-05-31 11:41:06.814167', '2024-05-31 11:41:06.814167', 'admin', '{"country": "India", "population": 1427104000}', '2');
-INSERT INTO public.table_data VALUES ('37507a3b-e362-4842-8304-40276c3dea84', '2024-05-31 11:41:06.814167', '2024-05-31 11:41:06.814167', 'admin', '{"country": "China", "population": 1411750000}', '2');
+INSERT INTO public.table_data VALUES ('37507a3b-e362-4842-8304-40276c3dea83', '2024-05-31 11:41:06.814167', '2024-05-31 11:41:06.814167', 'admin', '{"country": "India", "someDate": "2024-05-31 11:41:06.814", "someFlag": true, "population": 1427104000}', '2');
+INSERT INTO public.table_data VALUES ('37507a3b-e362-4842-8304-40276c3dea84', '2024-05-31 11:41:06.814167', '2024-05-31 11:41:06.814167', 'admin', '{"country": "China", "someDate": "2020-03-11 11:41:06.814", "someFlag": false, "population": 1411750000}', '2');
 
 
 --
@@ -95,7 +95,7 @@ INSERT INTO public.table_data VALUES ('37507a3b-e362-4842-8304-40276c3dea84', '2
 --
 
 INSERT INTO public.table_meta VALUES ('37507a3b-e362-4842-8304-40276c3dea80', '2024-05-31 11:08:08.799463', '2024-05-31 11:08:08.799463', 'admin', '[{"title": "Name", "dataIndex": "name"}, {"title": "Age", "dataIndex": "age"}, {"title": "Address", "dataIndex": "address"}]', '1');
-INSERT INTO public.table_meta VALUES ('37507a3b-e362-4842-8304-40276c3dea81', '2024-05-31 11:08:08.799463', '2024-05-31 11:08:08.799463', 'admin', '[{"title": "Country", "dataIndex": "country"}, {"title": "Population", "dataIndex": "population"}]', '2');
+INSERT INTO public.table_meta VALUES ('37507a3b-e362-4842-8304-40276c3dea81', '2024-05-31 11:08:08.799463', '2024-05-31 11:08:08.799463', 'admin', '[{"title": "Country", "dataIndex": "country"}, {"title": "Population", "dataIndex": "population"}, {"type": "boolean", "title": "someFlag", "dataIndex": "someFlag"}, {"type": "date", "title": "someDate", "dataIndex": "someDate"}]', '2');
 
 
 --
@@ -108,7 +108,7 @@ REVOKE USAGE ON SCHEMA public FROM PUBLIC;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2024-06-03 12:50:26 MSK
+-- Completed on 2024-06-03 17:00:53 MSK
 
 --
 -- PostgreSQL database dump complete
