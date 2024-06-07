@@ -10,7 +10,7 @@ const App = () => {
       }}
     >
       <VirtualTable id="1" />
-      <VirtualTable id="2" />
+      {/* <VirtualTable id="2" /> */}
     </div>
   );
 };

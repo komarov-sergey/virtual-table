@@ -1,19 +1,97 @@
-import { useEffect, useState } from "react";
-import { Table, Checkbox } from "antd";
+import React, { useEffect, useState, useRef, useContext } from "react";
+import { Table, Checkbox, Button, Input, Form } from "antd";
 import moment from "moment";
+
+const EditableContext = React.createContext(null);
+
+const EditableRow = ({ index, ...props }) => {
+  const [form] = Form.useForm();
+
+  return (
+    <Form form={form} component={false}>
+      <EditableContext.Provider value={form}>
+        <tr {...props} />
+      </EditableContext.Provider>
+    </Form>
+  );
+};
+
+const EditableCell = ({
+  children,
+  editable,
+  handleSave,
+  record,
+  title,
+  dataIndex,
+  ...restProps
+}) => {
+  const [editing, setEditing] = useState(false);
+  const inputRef = useRef(null);
+  const form = useContext(EditableContext);
+
+  useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus();
+    }
+  }, [editing]);
+
+  const toggleEdit = () => {
+    setEditing(!editing);
+    form.setFieldsValue({
+      [dataIndex]: record[dataIndex],
+    });
+  };
+
+  const save = async () => {
+    try {
+      const values = await form.validateFields();
+      toggleEdit();
+      handleSave({
+        ...record,
+        ...values,
+      });
+    } catch (errInfo) {
+      console.log("Save failed:", errInfo);
+    }
+  };
+
+  let childNode = children;
+
+  if (editable) {
+    if (record)
+      childNode = editing ? (
+        <Form.Item
+          name={dataIndex}
+          style={{ margin: 0, maxWidth: "250px", height: "28px" }}
+        >
+          <Input ref={inputRef} onPressEnter={save} onBlur={save} height={10} />
+        </Form.Item>
+      ) : (
+        <div onClick={toggleEdit} style={{ height: "28px" }}>
+          {children}
+        </div>
+      );
+  }
+
+  return (
+    <td {...restProps} width="300" height="50">
+      {childNode}
+    </td>
+  );
+};
 
 const VirtualTable = ({ id }) => {
   const [isLoading, setIsLading] = useState();
-  const [table1Data, setTable1Data] = useState([]);
-  const [table1Meta, setTable1Meta] = useState([]);
+  const [tableData, settableData] = useState([]);
+  const [tableMeta, settableMeta] = useState([]);
 
   useEffect(() => {
     setIsLading(true);
 
     Promise.all([getData(id), getMeta(id)])
       .then((result) => {
-        setTable1Data(result[0]);
-        setTable1Meta(prepareColumns(result[1]));
+        settableData(prepareData(result[0]));
+        settableMeta(prepareMetaColumns(result[1]));
       })
       .finally(() => {
         setIsLading(false);
@@ -36,13 +114,14 @@ const VirtualTable = ({ id }) => {
       .then((result) => result)
       .catch((error) => console.error(error));
 
-  const prepareColumns = (meta) => {
+  const prepareMetaColumns = (meta) => {
     meta.map((el) => {
       if (el?.type && el?.type === "boolean") {
         return (el.render = (checked) => {
           return <Checkbox checked={checked} disabled />;
         });
       }
+
       if (el?.type && el?.type === "date") {
         return (el.render = (date) => {
           return moment(date).format("DD-MM-YYYY");
@@ -52,11 +131,93 @@ const VirtualTable = ({ id }) => {
       return el;
     });
 
-    return meta;
+    const operation = {
+      title: "operation",
+      dataIndex: "operation",
+      render: () => {
+        return <span>Edit</span>;
+      },
+    };
+
+    meta = meta.map((col) => {
+      if (!col.editable) return col;
+
+      return {
+        ...col,
+        onCell: (record) => ({
+          record,
+          editable: col.editable,
+          dataIndex: col.dataIndex,
+          title: col.title,
+          handleSave,
+        }),
+      };
+    });
+
+    return [operation, ...meta];
+  };
+
+  const prepareData = (data) =>
+    data.map((el, i) => {
+      el.key = i;
+      return el;
+    });
+
+  const handleAdd = () => {
+    console.log("handleAdd");
+
+    const newData = {
+      key: tableData.length,
+      name: `Edward King ${tableData.length}`,
+      age: "32",
+      address: `London, Park Lane no. ${tableData.length}`,
+    };
+
+    settableData(prepareData([newData, ...tableData]));
+  };
+
+  const handleSave = async ({ id, name, age, address }) => {
+    const raw = JSON.stringify({
+      age,
+      name,
+      address,
+    });
+
+    await fetch(`http://localhost:5174/api/table/record/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: raw,
+    })
+      .then((response) => response.json())
+      .then((result) => console.log(result))
+      .catch((error) => console.error(error));
   };
 
   return (
-    <Table columns={table1Meta} dataSource={table1Data} loading={isLoading} />
+    <>
+      <Button
+        onClick={handleAdd}
+        type="primary"
+        style={{
+          marginBottom: 16,
+          width: "100px",
+        }}
+      >
+        Add a row
+      </Button>
+      <Table
+        components={{
+          body: {
+            cell: EditableCell,
+            row: EditableRow,
+          },
+        }}
+        columns={tableMeta}
+        dataSource={tableData}
+        loading={isLoading}
+        bordered
+      />
+    </>
   );
 };
 
