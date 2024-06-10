@@ -1,4 +1,4 @@
-import VirtualTable from "./components/VirtualTable";
+import VirtualTable from "./VirtualTable";
 
 const App = () => {
   return (

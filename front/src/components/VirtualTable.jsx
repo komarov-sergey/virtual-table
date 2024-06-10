@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
+import { Link } from "react-router-dom";
 import { Table, Checkbox, Button, Input, Form } from "antd";
 import moment from "moment";
 
@@ -6,6 +7,8 @@ const EditableContext = React.createContext(null);
 
 const EditableRow = ({ index, ...props }) => {
   const [form] = Form.useForm();
+
+  console.log({ index, props });
 
   return (
     <Form form={form} component={false}>
@@ -115,6 +118,7 @@ const VirtualTable = ({ id }) => {
       .catch((error) => console.error(error));
 
   const prepareMetaColumns = (meta) => {
+    console.log({ meta });
     meta.map((el) => {
       if (el?.type && el?.type === "boolean") {
         return (el.render = (checked) => {
@@ -134,8 +138,9 @@ const VirtualTable = ({ id }) => {
     const operation = {
       title: "operation",
       dataIndex: "operation",
-      render: () => {
-        return <span>Edit</span>;
+      render: (_, record) => {
+        console.log({ record });
+        return <Link to={`record/${record?.id}`}>go to card</Link>;
       },
     };
 
@@ -168,12 +173,28 @@ const VirtualTable = ({ id }) => {
 
     const newData = {
       key: tableData.length,
-      name: `Edward King ${tableData.length}`,
+      name: `Edward King ${tableData.length} new`,
       age: "32",
       address: `London, Park Lane no. ${tableData.length}`,
     };
 
     settableData(prepareData([newData, ...tableData]));
+
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    const raw = JSON.stringify(newData);
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+    };
+
+    fetch("http://localhost:5174/api/table/record/1", requestOptions)
+      .then((response) => response.text())
+      .then((result) => console.log(result))
+      .catch((error) => console.error(error));
   };
 
   const handleSave = async ({ id, name, age, address }) => {
@@ -190,6 +211,8 @@ const VirtualTable = ({ id }) => {
     })
       .then((response) => response.json())
       .then((result) => console.log(result))
+      .then(() => getData())
+      .then((result) => settableData(prepareData(result)))
       .catch((error) => console.error(error));
   };
 
