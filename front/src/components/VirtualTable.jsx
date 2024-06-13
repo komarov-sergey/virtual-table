@@ -1,14 +1,15 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import { Link } from "react-router-dom";
-import { Table, Checkbox, Button, Input, Form } from "antd";
+import { Table, Checkbox, Button, Input, Form, Select } from "antd";
 import moment from "moment";
+import { useParams } from "react-router-dom";
 
 const EditableContext = React.createContext(null);
 
 const EditableRow = ({ index, ...props }) => {
   const [form] = Form.useForm();
 
-  console.log({ index, props });
+  // console.log({ index, props });
 
   return (
     <Form form={form} component={false}>
@@ -83,15 +84,22 @@ const EditableCell = ({
   );
 };
 
-const VirtualTable = ({ id }) => {
+const VirtualTable = () => {
   const [isLoading, setIsLading] = useState();
   const [tableData, settableData] = useState([]);
   const [tableMeta, settableMeta] = useState([]);
+  let { tableId } = useParams();
+
+  if (!tableId) {
+    tableId = "1";
+  }
+
+  console.log({ tableId });
 
   useEffect(() => {
     setIsLading(true);
 
-    Promise.all([getData(id), getMeta(id)])
+    Promise.all([getData(), getMeta()])
       .then((result) => {
         settableData(prepareData(result[0]));
         settableMeta(prepareMetaColumns(result[1]));
@@ -102,7 +110,7 @@ const VirtualTable = ({ id }) => {
   }, []);
 
   const getData = () =>
-    fetch(`http://localhost:5174/api/table/data/${id}`, {
+    fetch(`http://localhost:5174/api/table/data/${tableId}`, {
       method: "POST",
     })
       .then((response) => response.json())
@@ -110,7 +118,7 @@ const VirtualTable = ({ id }) => {
       .catch((error) => console.error(error));
 
   const getMeta = () =>
-    fetch(`http://localhost:5174/api/table/meta/${id}`, {
+    fetch(`http://localhost:5174/api/table/meta/${tableId}`, {
       method: "POST",
     })
       .then((response) => response.json())
@@ -118,7 +126,6 @@ const VirtualTable = ({ id }) => {
       .catch((error) => console.error(error));
 
   const prepareMetaColumns = (meta) => {
-    console.log({ meta });
     meta.map((el) => {
       if (el?.type && el?.type === "boolean") {
         return (el.render = (checked) => {
@@ -132,6 +139,27 @@ const VirtualTable = ({ id }) => {
         });
       }
 
+      console.log(el);
+
+      if (el?.title === "Link") {
+        return (el.render = (_, record) => {
+          return <a href={`/${record.link}`}>go to linked table</a>;
+        });
+      }
+
+      if (el?.title === "Select") {
+        return (el.render = (_, record) => {
+          console.log(record.select);
+
+          const prepareValues = record.select.map((el) => ({
+            value: el,
+            label: el,
+          }));
+
+          return <Select options={prepareValues} style={{ width: 120 }} />;
+        });
+      }
+
       return el;
     });
 
@@ -139,8 +167,7 @@ const VirtualTable = ({ id }) => {
       title: "operation",
       dataIndex: "operation",
       render: (_, record) => {
-        console.log({ record });
-        return <Link to={`record/${record?.id}`}>go to card</Link>;
+        return <a href={`record/${record?.id}`}>go to card</a>;
       },
     };
 
@@ -169,8 +196,6 @@ const VirtualTable = ({ id }) => {
     });
 
   const handleAdd = () => {
-    console.log("handleAdd");
-
     const newData = {
       key: tableData.length,
       name: `Edward King ${tableData.length} new`,
@@ -192,8 +217,7 @@ const VirtualTable = ({ id }) => {
     };
 
     fetch("http://localhost:5174/api/table/record/1", requestOptions)
-      .then((response) => response.text())
-      .then((result) => console.log(result))
+      .then(() => {})
       .catch((error) => console.error(error));
   };
 
@@ -204,13 +228,12 @@ const VirtualTable = ({ id }) => {
       address,
     });
 
-    await fetch(`http://localhost:5174/api/table/record/${id}`, {
+    await fetch(`http://localhost:5174/api/table/record/${tableId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: raw,
     })
       .then((response) => response.json())
-      .then((result) => console.log(result))
       .then(() => getData())
       .then((result) => settableData(prepareData(result)))
       .catch((error) => console.error(error));

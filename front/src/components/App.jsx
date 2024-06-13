@@ -9,7 +9,7 @@ const App = () => {
         gap: "32px",
       }}
     >
-      <VirtualTable id="1" />
+      <VirtualTable />
       {/* <VirtualTable id="2" /> */}
     </div>
   );

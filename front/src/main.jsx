@@ -15,6 +15,11 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
+    path: "/:tableId",
+    element: <App />,
+    errorElement: <ErrorPage />,
+  },
+  {
     path: "record/:recordId",
     element: <RecordCard />,
   },

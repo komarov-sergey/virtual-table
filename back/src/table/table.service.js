@@ -3,12 +3,12 @@ const { v4: uuidv4 } = require("uuid");
 
 async function getTableMeta({ tableId }) {
   try {
-    const [result] = await sequelize.query(
-      `select * from table_meta where table_id=${tableId}::text`,
-      { logging: console.log }
+    const [meta] = await sequelize.query(
+      `select * from table_meta where table_id=${tableId}::text`
+      // { logging: console.log }
     );
 
-    return result.length > 0 ? result[0].meta : [];
+    return meta.length > 0 ? meta[0].meta : [];
   } catch (e) {
     return {
       errors: [e.toString()],
@@ -17,12 +17,49 @@ async function getTableMeta({ tableId }) {
 }
 
 async function getTableData({ tableId }) {
+  console.log({ tableId });
   try {
-    const [result] = await sequelize.query(
+    const [data] = await sequelize.query(
       `select * from table_data where table_id='${tableId}' order by createdat desc`
     );
 
-    return result.map((el) => ({ id: el.id, ...el.data }));
+    let [meta] = await sequelize.query(
+      `select * from table_meta where table_id=${tableId}::text`
+    );
+
+    meta = meta[0].meta;
+
+    const link = meta.filter((el) => el.title === "Link");
+    const select = meta.filter((el) => el.title === "Select");
+
+    if (link.length > 0) {
+      data.forEach((el) => (el.data = { ...el.data, link: link[0]?.tableId }));
+    }
+
+    if (select.length > 0) {
+      const tableId = select[0]?.tableId;
+      const dataIndex = select[0].dataIndex;
+
+      // console.log({ dataIndex });
+
+      const [selectData] = await sequelize.query(
+        `select * from table_data where table_id='${tableId}'`
+      );
+
+      // selectData.forEach((el) => console.log(el.data));
+
+      const getFieldsData = selectData.reduce((acc, curr) => {
+        // console.log(curr);
+        acc.push(curr.data[dataIndex]);
+        return acc;
+      }, []);
+
+      // console.log({ getFieldsData });
+
+      data.forEach((el) => (el.data = { ...el.data, select: getFieldsData }));
+    }
+
+    return data.map((el) => ({ id: el.id, ...el.data }));
   } catch (e) {
     return {
       errors: [e.toString()],
