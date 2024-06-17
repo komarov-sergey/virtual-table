@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
-import { Link } from "react-router-dom";
-import { Table, Checkbox, Button, Input, Form, Select } from "antd";
+import { Table, Checkbox, Button, Input, Form } from "antd";
 import moment from "moment";
 import { useParams } from "react-router-dom";
 
@@ -8,8 +7,6 @@ const EditableContext = React.createContext(null);
 
 const EditableRow = ({ index, ...props }) => {
   const [form] = Form.useForm();
-
-  // console.log({ index, props });
 
   return (
     <Form form={form} component={false}>
@@ -94,8 +91,6 @@ const VirtualTable = () => {
     tableId = "1";
   }
 
-  console.log({ tableId });
-
   useEffect(() => {
     setIsLading(true);
 
@@ -126,6 +121,8 @@ const VirtualTable = () => {
       .catch((error) => console.error(error));
 
   const prepareMetaColumns = (meta) => {
+    // meta = meta.filter((el) => !["Link"].includes(el.title));
+
     meta.map((el) => {
       if (el?.type && el?.type === "boolean") {
         return (el.render = (checked) => {
@@ -139,35 +136,35 @@ const VirtualTable = () => {
         });
       }
 
-      console.log(el);
-
       if (el?.title === "Link") {
         return (el.render = (_, record) => {
-          return <a href={`/${record.link}`}>go to linked table</a>;
+          return (
+            <a href={`record/${record.link.recordId}`}>
+              {record.link.recordId}
+            </a>
+          );
         });
       }
 
       if (el?.title === "Select") {
         return (el.render = (_, record) => {
-          console.log(record.select);
-
-          const prepareValues = record.select.map((el) => ({
-            value: el,
-            label: el,
-          }));
-
-          return <Select options={prepareValues} style={{ width: 120 }} />;
+          return record.selectValue;
         });
       }
 
       return el;
     });
 
-    const operation = {
+    const card = {
       title: "operation",
       dataIndex: "operation",
       render: (_, record) => {
-        return <a href={`record/${record?.id}`}>go to card</a>;
+        return (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <a href={`record/${record?.id}`}>go to card</a>
+            <a href={`record/edit/${record?.id}`}>edit</a>
+          </div>
+        );
       },
     };
 
@@ -186,14 +183,15 @@ const VirtualTable = () => {
       };
     });
 
-    return [operation, ...meta];
+    return [card, ...meta];
   };
 
-  const prepareData = (data) =>
-    data.map((el, i) => {
+  const prepareData = (data) => {
+    return data?.map((el, i) => {
       el.key = i;
       return el;
     });
+  };
 
   const handleAdd = () => {
     const newData = {

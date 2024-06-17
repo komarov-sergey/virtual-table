@@ -5,6 +5,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./components/App.jsx";
 import ErrorPage from "./components/ErrorPage.jsx";
 import RecordCard from "./components/RecordCard.jsx";
+import RecordCardEdit from "./components/RecordCardEdit.jsx";
 
 import "./index.css";
 
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
   {
     path: "record/:recordId",
     element: <RecordCard />,
+  },
+  {
+    path: "record/edit/:recordId",
+    element: <RecordCardEdit />,
   },
 ]);
 

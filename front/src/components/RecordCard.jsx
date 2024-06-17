@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { Input } from "antd";
 
 export default function RecordCard() {
   const [data, setData] = useState();
@@ -22,10 +23,12 @@ export default function RecordCard() {
     <>
       {data && (
         <div>
-          <div>{data.id}</div>
-          <div>{data.age}</div>
-          <div>{data.address}</div>
-          <div>{data.name}</div>
+          <Input value={data?.id} readOnly />
+          {data?.age && <Input value={data?.age} />}
+          {data?.address && <Input value={data?.address} />}
+          {data?.name && <Input value={data?.name} />}
+          {data?.country && <Input value={data?.country} />}
+          {data?.population && <Input value={data?.population} />}
         </div>
       )}
     </>
