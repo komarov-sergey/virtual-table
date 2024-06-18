@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { Input } from "antd";
+import { useParams, useNavigate } from "react-router-dom";
+import { Input, Form, Button } from "antd";
 
 export default function RecordCard() {
   const [data, setData] = useState();
   const { recordId } = useParams();
+  const navigate = useNavigate();
 
   function getRecord(recordId) {
     return fetch(`http://localhost:5174/api/table/record/${recordId}`, {
@@ -22,13 +23,52 @@ export default function RecordCard() {
   return (
     <>
       {data && (
-        <div>
-          <Input value={data?.id} readOnly />
-          {data?.age && <Input value={data?.age} />}
-          {data?.address && <Input value={data?.address} />}
-          {data?.name && <Input value={data?.name} />}
-          {data?.country && <Input value={data?.country} />}
-          {data?.population && <Input value={data?.population} />}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Form style={{ width: "600px" }}>
+            <h2>Карточка элемента</h2>
+            {data?.id && (
+              <Form.Item label="id">
+                <Input value={data?.id} readOnly />
+              </Form.Item>
+            )}
+            {data?.age && (
+              <Form.Item label="возраст">
+                <Input value={data?.age} readOnly />
+              </Form.Item>
+            )}
+            {data?.address && (
+              <Form.Item label="адрес">
+                <Input value={data?.address} readOnly />
+              </Form.Item>
+            )}
+            {data?.name && (
+              <Form.Item label="имя">
+                <Input value={data?.name} readOnly />
+              </Form.Item>
+            )}
+            {data?.country && (
+              <Form.Item label="страна">
+                <Input value={data?.country} readOnly />
+              </Form.Item>
+            )}
+            {data?.population && (
+              <Form.Item label="население">
+                <Input value={data?.population} readOnly />
+              </Form.Item>
+            )}
+            <Button
+              style={{ alignSelf: "flex-start" }}
+              onClick={() => navigate(-1)}
+            >
+              Назад
+            </Button>
+          </Form>
         </div>
       )}
     </>

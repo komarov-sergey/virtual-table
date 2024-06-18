@@ -88,7 +88,13 @@ export default function RecordCard() {
   return (
     <>
       {data && (
-        <>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <Form
             ref={formRef}
             initialValues={{
@@ -101,7 +107,9 @@ export default function RecordCard() {
             }}
             onFinish={onFinish}
             autoComplete="off"
+            style={{ width: "600px" }}
           >
+            <h2>Редактирование элемента</h2>
             <Form.Item label="id" name="id">
               <Input placeholder="id" readOnly />
             </Form.Item>
@@ -114,19 +122,34 @@ export default function RecordCard() {
             <Form.Item label="имя" name="name">
               <Input placeholder="name" />
             </Form.Item>
-            <Form.Item label="ссылка" name="link">
-              <Input placeholder="link" readOnly />
-            </Form.Item>
-            <Button type="primary" onClick={showModal}>
-              edit link
-            </Button>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                marginBottom: "16px",
+              }}
+            >
+              <Form.Item label="" name="link">
+                <Input placeholder="link" readOnly />
+              </Form.Item>
+              <Button type="primary" onClick={showModal}>
+                edit link
+              </Button>
+            </div>
             <Form.Item label="выбор" name="select">
               <Select options={data.select} />
             </Form.Item>
-
-            <Button type="primary" htmlType="submit">
-              сохранить
-            </Button>
+            <div style={{ display: "flex", gap: "16px" }}>
+              <Button
+                style={{ alignSelf: "flex-start" }}
+                onClick={() => navigate(-1)}
+              >
+                Назад
+              </Button>
+              <Button type="primary" htmlType="submit">
+                сохранить
+              </Button>
+            </div>
           </Form>
           <Modal
             title="Basic Modal"
@@ -151,7 +174,7 @@ export default function RecordCard() {
               }}
             />
           </Modal>
-        </>
+        </div>
       )}
     </>
   );
