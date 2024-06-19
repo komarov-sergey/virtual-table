@@ -2,10 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Input, Form, Button, Select, Modal, Table } from "antd";
 
-function getKeyByValue(obj, value) {
-  return Object.keys(obj).filter((key) => obj[key].toString() === value);
-}
-
 export default function RecordCard() {
   const [data, setData] = useState();
   const [modalData, setModalData] = useState();
@@ -13,16 +9,17 @@ export default function RecordCard() {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const formRef = useRef(null);
-  const [field, setField] = useState("");
-  const [linkData, setLinkData] = useState({ id: "", field: "", value: "" });
-
-  console.log({ linkData });
 
   // modal -->
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
+      // console.log(
+      //   `selectedRowKeys: ${selectedRowKeys}`,
+      //   "selectedRows: ",
+      //   selectedRows
+      // );
       formRef.current?.setFieldsValue({
-        link: selectedRows[0],
+        link: selectedRows[0].id,
       });
     },
   };
@@ -32,13 +29,6 @@ export default function RecordCard() {
   };
 
   const handleOk = () => {
-    const currentLink = formRef.current.getFieldValue("link");
-    const fieldKey = getKeyByValue(currentLink, field);
-
-    console.log({ currentLink });
-    console.log({ field });
-
-    setLinkData({ id: currentLink.id, field: fieldKey[0], value: field });
     setIsModalOpen(false);
   };
 
@@ -67,22 +57,16 @@ export default function RecordCard() {
         setData(result);
         // getModalData(result.link.tableId);
         getModalData(2);
-
-        setLinkData(result.link);
       })
       .catch((error) => console.error(error));
   }
 
-  async function onFinish({ id, name, age, address, select }) {
+  async function onFinish({ id, name, age, address, link, select }) {
     const raw = JSON.stringify({
       age,
       name,
       address,
-      link: {
-        recordId: linkData.id,
-        field: linkData.field,
-        value: linkData.value,
-      },
+      link: { tableId: 2, recordId: link },
       selectValue: select,
     });
 
@@ -97,21 +81,8 @@ export default function RecordCard() {
     navigate("/");
   }
 
-  function onCell(record, rowIndex) {
-    return {
-      onClick: (e) => {
-        console.log(e.target.innerText);
-        setField(e.target.innerText);
-      },
-      onMouseEnter: (e) => {
-        // console.log("onMouseEnter", typeof e.target);
-        e.target.style.border = "1px solid blue";
-      },
-      onMouseLeave: (e) => {
-        // console.log("onMouseEnter", typeof e.target);
-        e.target.style.border = "none";
-      },
-    };
+  function handleClick(props) {
+    console.log("handleClick", data);
   }
 
   useEffect(() => {
@@ -135,7 +106,7 @@ export default function RecordCard() {
               age: data?.age,
               address: data?.address,
               name: data?.name,
-              // link: data?.link?.value,
+              link: data?.link?.recordId,
               select: data?.selectValue,
             }}
             onFinish={onFinish}
@@ -162,22 +133,16 @@ export default function RecordCard() {
                 marginBottom: "16px",
               }}
             >
-              {linkData && (
-                <Form.Item label={linkData.field}>
-                  <Input
-                    readOnly
-                    defaultValue={linkData.value}
-                    value={linkData.value}
-                  />
-                </Form.Item>
-              )}
+              <Form.Item label="" name="link">
+                <Input placeholder="link" readOnly />
+              </Form.Item>
               <Button type="primary" onClick={showModal}>
                 edit link
               </Button>
             </div>
-            {/* <Form.Item label="выбор" name="select">
+            <Form.Item label="выбор" name="select">
               <Select options={data.select} />
-            </Form.Item> */}
+            </Form.Item>
             <div style={{ display: "flex", gap: "16px" }}>
               <Button
                 style={{ alignSelf: "flex-start" }}
@@ -202,19 +167,12 @@ export default function RecordCard() {
                   title: "id",
                   dataIndex: "id",
                   key: "id",
-                  onCell,
                 },
-                {
-                  title: "Country",
-                  dataIndex: "country",
-                  key: "country",
-                  onCell,
-                },
+                { title: "Country", dataIndex: "country", key: "country" },
                 {
                   title: "Population",
                   dataIndex: "population",
                   key: "population",
-                  onCell,
                 },
               ]}
               dataSource={modalData}
