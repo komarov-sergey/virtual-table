@@ -2,9 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Input, Form, Button, Select, Modal, Table } from "antd";
 
-function getKeyByValue(obj, value) {
-  return Object.keys(obj).filter((key) => obj[key].toString() === value);
-}
+import { getKeyByValue } from "../helpers/index";
 
 export default function RecordCard() {
   const [data, setData] = useState();
@@ -15,8 +13,6 @@ export default function RecordCard() {
   const formRef = useRef(null);
   const [field, setField] = useState("");
   const [linkData, setLinkData] = useState({ id: "", field: "", value: "" });
-
-  console.log({ linkData });
 
   // modal -->
   const rowSelection = {
@@ -35,8 +31,8 @@ export default function RecordCard() {
     const currentLink = formRef.current.getFieldValue("link");
     const fieldKey = getKeyByValue(currentLink, field);
 
-    console.log({ currentLink });
-    console.log({ field });
+    // console.log({ currentLink });
+    // console.log({ field });
 
     setLinkData({ id: currentLink.id, field: fieldKey[0], value: field });
     setIsModalOpen(false);
@@ -136,7 +132,7 @@ export default function RecordCard() {
               address: data?.address,
               name: data?.name,
               // link: data?.link?.value,
-              select: data?.selectValue,
+              // select: data?.selectValue,
             }}
             onFinish={onFinish}
             autoComplete="off"

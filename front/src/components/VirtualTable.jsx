@@ -43,6 +43,8 @@ const VirtualTable = () => {
       .catch((error) => console.error(error));
 
   const prepareMetaColumns = (meta) => {
+    meta = meta.filter((el) => el.title !== "Select");
+
     meta.map((el) => {
       if (el?.type && el?.type === "boolean") {
         return (el.render = (checked) => {
@@ -60,7 +62,7 @@ const VirtualTable = () => {
         return (el.render = (_, record) => {
           return (
             <a href={`record/${record.link.recordId}`}>
-              {record.link.recordId}
+              {record.link.field}: {record.link.value}
             </a>
           );
         });
@@ -113,12 +115,17 @@ const VirtualTable = () => {
   };
 
   return (
-    <Table
-      columns={tableMeta}
-      dataSource={tableData}
-      loading={isLoading}
-      bordered
-    />
+    <>
+      <Button type="primary" style={{ width: "150px" }}>
+        <a href={"record/new"}>Add</a>
+      </Button>
+      <Table
+        columns={tableMeta}
+        dataSource={tableData}
+        loading={isLoading}
+        bordered
+      />
+    </>
   );
 };
 

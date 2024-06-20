@@ -6,6 +6,7 @@ import App from "./components/App.jsx";
 import ErrorPage from "./components/ErrorPage.jsx";
 import RecordCard from "./components/RecordCard.jsx";
 import RecordCardEdit from "./components/RecordCardEdit.jsx";
+import RecordCardNew from "./components/RecordCardNew.jsx";
 
 import "./index.css";
 
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
   {
     path: "record/edit/:recordId",
     element: <RecordCardEdit />,
+  },
+  {
+    path: "record/new",
+    element: <RecordCardNew />,
   },
 ]);
 
