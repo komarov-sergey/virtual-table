@@ -10,7 +10,12 @@ export default function RecordCardNew() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const formRef = useRef(null);
   const [field, setField] = useState("");
-  const [linkData, setLinkData] = useState({ id: "", field: "", value: "" });
+  const [linkData1, setLinkData1] = useState({ id: "", value: "" });
+  const [linkData2, setLinkData2] = useState({ id: "", value: "" });
+  const [activeModal, setActiveModal] = useState();
+  const [tableMeta, setTableMeta] = useState([]);
+
+  console.log({ activeModal });
 
   // modal -->
   const rowSelection = {
@@ -27,13 +32,20 @@ export default function RecordCardNew() {
 
   const handleOk = () => {
     const currentLink = formRef.current.getFieldValue("link");
-    const fieldKey = getKeyByValue(currentLink, field);
+    const metaColumns = tableMeta.filter((el) =>
+      Object.keys(el).includes("tableId")
+    );
+    const currentMetaColumn = metaColumns[activeModal - 1].dataIndex;
 
-    console.log({ currentLink });
-    console.log({ field });
-    console.log(fieldKey[0]);
-
-    setLinkData({ id: currentLink.id, field: fieldKey[0], value: field });
+    activeModal === 1
+      ? setLinkData1({
+          id: currentLink.id,
+          value: currentLink[currentMetaColumn],
+        })
+      : setLinkData2({
+          id: currentLink.id,
+          value: currentLink[currentMetaColumn],
+        });
     setIsModalOpen(false);
   };
 
@@ -53,20 +65,31 @@ export default function RecordCardNew() {
   }
   // modal <--
 
+  const tableId = 1;
+
+  const getMeta = () =>
+    fetch(`http://localhost:5174/api/table/meta/${tableId}`, {
+      method: "POST",
+    })
+      .then((response) => response.json())
+      .then((result) => setTableMeta(result))
+      .catch((error) => console.error(error));
+
   async function onFinish({ name, age, address, select }) {
     console.log("onFinish");
-    console.log({ linkData });
 
     const raw = JSON.stringify({
       age,
       name,
       address,
       link: {
-        recordId: linkData.id,
-        field: linkData.field,
-        value: linkData.value,
+        recordId: linkData1.id,
+        value: linkData1.value,
       },
-      // selectValue: select,
+      link2: {
+        recordId: linkData2.id,
+        value: linkData2.value,
+      },
     });
 
     await fetch(`http://localhost:5174/api/table/record/1`, {
@@ -80,24 +103,8 @@ export default function RecordCardNew() {
     navigate("/");
   }
 
-  function onCell(record, rowIndex) {
-    return {
-      onClick: (e) => {
-        console.log(e.target.innerText);
-        setField(e.target.innerText);
-      },
-      onMouseEnter: (e) => {
-        // console.log("onMouseEnter", typeof e.target);
-        e.target.style.border = "1px solid blue";
-      },
-      onMouseLeave: (e) => {
-        // console.log("onMouseEnter", typeof e.target);
-        e.target.style.border = "none";
-      },
-    };
-  }
-
   useEffect(() => {
+    getMeta();
     getModalData(2);
   }, []);
 
@@ -125,24 +132,35 @@ export default function RecordCardNew() {
         <Form.Item label="имя" name="name">
           <Input placeholder="name" />
         </Form.Item>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            marginBottom: "16px",
-          }}
-        >
-          <Form.Item label={linkData.field}>
-            <Input
-              readOnly
-              defaultValue={linkData.value}
-              value={linkData.value}
-            />
-          </Form.Item>
-          <Button type="primary" onClick={showModal}>
-            edit link
-          </Button>
-        </div>
+
+        {tableMeta
+          .filter((el) => Object.keys(el).includes("tableId"))
+          .map((el, i) => (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                marginBottom: "16px",
+              }}
+            >
+              <Form.Item label={el.dataIndex}>
+                <Input
+                  readOnly
+                  value={i === 0 ? linkData1.value : linkData2.value}
+                />
+              </Form.Item>
+              <Button
+                type="primary"
+                onClick={() => {
+                  setActiveModal(i + 1);
+                  showModal(true);
+                }}
+              >
+                edit link
+              </Button>
+            </div>
+          ))}
+
         <div style={{ display: "flex", gap: "16px" }}>
           <Button
             style={{ alignSelf: "flex-start" }}
@@ -167,14 +185,12 @@ export default function RecordCardNew() {
               title: "id",
               dataIndex: "id",
               key: "id",
-              onCell,
             },
-            { title: "Country", dataIndex: "country", key: "country", onCell },
+            { title: "Country", dataIndex: "country", key: "country" },
             {
               title: "Population",
               dataIndex: "population",
               key: "population",
-              onCell,
             },
           ]}
           dataSource={modalData}

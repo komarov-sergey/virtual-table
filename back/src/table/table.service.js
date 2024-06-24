@@ -101,29 +101,29 @@ async function getTableRecord({ recordId }) {
       `select * from table_data where id='${recordId}'`
     );
 
-    let [meta] = await sequelize.query(
-      `select * from table_meta where table_id=${data[0].table_id}::text`
-    );
+    // let [meta] = await sequelize.query(
+    //   `select * from table_meta where table_id=${data[0].table_id}::text`
+    // );
 
-    meta = meta[0].meta;
+    // meta = meta[0].meta;
 
-    const select = meta.filter((el) => el.title === "Select");
+    // const select = meta.filter((el) => el.title === "Select");
 
-    if (select.length > 0) {
-      const tableId = select[0]?.tableId;
-      const dataIndex = select[0].dataIndex;
+    // if (select.length > 0) {
+    //   const tableId = select[0]?.tableId;
+    //   const dataIndex = select[0].dataIndex;
 
-      const [selectData] = await sequelize.query(
-        `select * from table_data where table_id='${tableId}'`
-      );
+    //   const [selectData] = await sequelize.query(
+    //     `select * from table_data where table_id='${tableId}'`
+    //   );
 
-      const getFieldsData = selectData.reduce((acc, curr) => {
-        acc.push({ value: curr.id, label: curr.data[dataIndex] });
-        return acc;
-      }, []);
+    //   const getFieldsData = selectData.reduce((acc, curr) => {
+    //     acc.push({ value: curr.id, label: curr.data[dataIndex] });
+    //     return acc;
+    //   }, []);
 
-      data.forEach((el) => (el.data = { ...el.data, select: getFieldsData }));
-    }
+    //   data.forEach((el) => (el.data = { ...el.data, select: getFieldsData }));
+    // }
 
     return { id: data[0].id, tableId: data[0].table_id, ...data[0].data };
   } catch (e) {

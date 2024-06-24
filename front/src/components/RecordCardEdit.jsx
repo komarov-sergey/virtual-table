@@ -13,6 +13,7 @@ export default function RecordCard() {
   const formRef = useRef(null);
   const [field, setField] = useState("");
   const [linkData, setLinkData] = useState({ id: "", field: "", value: "" });
+  const [linkData2, setLinkData2] = useState({ id: "", field: "", value: "" });
 
   // modal -->
   const rowSelection = {
@@ -61,10 +62,12 @@ export default function RecordCard() {
       .then((response) => response.json())
       .then((result) => {
         setData(result);
+        console.log({ result });
         // getModalData(result.link.tableId);
         getModalData(2);
 
         setLinkData(result.link);
+        setLinkData2(result.link2);
       })
       .catch((error) => console.error(error));
   }
@@ -151,6 +154,7 @@ export default function RecordCard() {
             <Form.Item label="имя" name="name">
               <Input placeholder="name" />
             </Form.Item>
+
             <div
               style={{
                 display: "flex",
@@ -171,9 +175,28 @@ export default function RecordCard() {
                 edit link
               </Button>
             </div>
-            {/* <Form.Item label="выбор" name="select">
-              <Select options={data.select} />
-            </Form.Item> */}
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                marginBottom: "16px",
+              }}
+            >
+              {linkData2 && (
+                <Form.Item label={linkData2.field}>
+                  <Input
+                    readOnly
+                    defaultValue={linkData2.value}
+                    value={linkData2.value}
+                  />
+                </Form.Item>
+              )}
+              <Button type="primary" onClick={showModal}>
+                edit link
+              </Button>
+            </div>
+
             <div style={{ display: "flex", gap: "16px" }}>
               <Button
                 style={{ alignSelf: "flex-start" }}

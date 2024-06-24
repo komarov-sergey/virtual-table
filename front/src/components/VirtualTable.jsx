@@ -9,6 +9,8 @@ const VirtualTable = () => {
   const [tableMeta, settableMeta] = useState([]);
   let { tableId } = useParams();
 
+  console.log(tableMeta);
+
   if (!tableId) {
     tableId = "1";
   }
@@ -46,6 +48,11 @@ const VirtualTable = () => {
     meta = meta.filter((el) => el.title !== "Select");
 
     meta.map((el) => {
+      // filter example
+      if (el.title === "Address") {
+        el.onFilter = (value, record) => record.address.indexOf(value) === 0;
+      }
+
       if (el?.type && el?.type === "boolean") {
         return (el.render = (checked) => {
           return <Checkbox checked={checked} disabled />;
@@ -58,19 +65,25 @@ const VirtualTable = () => {
         });
       }
 
-      if (el?.title === "Link") {
+      // link example
+      if (el?.title === "Country") {
         return (el.render = (_, record) => {
+          console.log({ record });
+          console.log({ el });
           return (
-            <a href={`record/${record.link.recordId}`}>
-              {record.link.field}: {record.link.value}
-            </a>
+            <a href={`record/${record.link?.recordId}`}>{record.link?.value}</a>
           );
         });
       }
-
-      if (el?.title === "Select") {
+      if (el?.title === "Population") {
         return (el.render = (_, record) => {
-          return record.selectValue;
+          console.log({ record });
+          console.log({ el });
+          return (
+            <a href={`record/${record.link2?.recordId}`}>
+              {record.link2?.value}
+            </a>
+          );
         });
       }
 
