@@ -11,9 +11,10 @@ export default function RecordCard() {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const formRef = useRef(null);
-  const [field, setField] = useState("");
-  const [linkData, setLinkData] = useState({ id: "", field: "", value: "" });
-  const [linkData2, setLinkData2] = useState({ id: "", field: "", value: "" });
+  const [linkData1, setLinkData1] = useState({ id: "", value: "" });
+  const [linkData2, setLinkData2] = useState({ id: "", value: "" });
+  const [activeModal, setActiveModal] = useState();
+  const [tableMeta, setTableMeta] = useState([]);
 
   // modal -->
   const rowSelection = {
@@ -30,12 +31,20 @@ export default function RecordCard() {
 
   const handleOk = () => {
     const currentLink = formRef.current.getFieldValue("link");
-    const fieldKey = getKeyByValue(currentLink, field);
+    const metaColumns = tableMeta.filter((el) =>
+      Object.keys(el).includes("tableId")
+    );
+    const currentMetaColumn = metaColumns[activeModal - 1].dataIndex;
 
-    // console.log({ currentLink });
-    // console.log({ field });
-
-    setLinkData({ id: currentLink.id, field: fieldKey[0], value: field });
+    activeModal === 1
+      ? setLinkData1({
+          id: currentLink.id,
+          value: currentLink[currentMetaColumn],
+        })
+      : setLinkData2({
+          id: currentLink.id,
+          value: currentLink[currentMetaColumn],
+        });
     setIsModalOpen(false);
   };
 
@@ -55,6 +64,16 @@ export default function RecordCard() {
   }
   // modal <--
 
+  const tableId = 1;
+
+  const getMeta = () =>
+    fetch(`http://localhost:5174/api/table/meta/${tableId}`, {
+      method: "POST",
+    })
+      .then((response) => response.json())
+      .then((result) => setTableMeta(result))
+      .catch((error) => console.error(error));
+
   function getRecord(recordId) {
     return fetch(`http://localhost:5174/api/table/record/${recordId}`, {
       method: "GET",
@@ -63,26 +82,28 @@ export default function RecordCard() {
       .then((result) => {
         setData(result);
         console.log({ result });
-        // getModalData(result.link.tableId);
         getModalData(2);
+        getMeta();
 
-        setLinkData(result.link);
+        setLinkData1(result.link);
         setLinkData2(result.link2);
       })
       .catch((error) => console.error(error));
   }
 
-  async function onFinish({ id, name, age, address, select }) {
+  async function onFinish({ id, name, age, address }) {
     const raw = JSON.stringify({
       age,
       name,
       address,
       link: {
-        recordId: linkData.id,
-        field: linkData.field,
-        value: linkData.value,
+        recordId: linkData1.recordId,
+        value: linkData1.value,
       },
-      selectValue: select,
+      link2: {
+        recordId: linkData2.recordId,
+        value: linkData2.value,
+      },
     });
 
     await fetch(`http://localhost:5174/api/table/record/${id}`, {
@@ -94,23 +115,6 @@ export default function RecordCard() {
       .catch((error) => console.error(error));
 
     navigate("/");
-  }
-
-  function onCell(record, rowIndex) {
-    return {
-      onClick: (e) => {
-        console.log(e.target.innerText);
-        setField(e.target.innerText);
-      },
-      onMouseEnter: (e) => {
-        // console.log("onMouseEnter", typeof e.target);
-        e.target.style.border = "1px solid blue";
-      },
-      onMouseLeave: (e) => {
-        // console.log("onMouseEnter", typeof e.target);
-        e.target.style.border = "none";
-      },
-    };
   }
 
   useEffect(() => {
@@ -134,8 +138,6 @@ export default function RecordCard() {
               age: data?.age,
               address: data?.address,
               name: data?.name,
-              // link: data?.link?.value,
-              // select: data?.selectValue,
             }}
             onFinish={onFinish}
             autoComplete="off"
@@ -155,47 +157,33 @@ export default function RecordCard() {
               <Input placeholder="name" />
             </Form.Item>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                marginBottom: "16px",
-              }}
-            >
-              {linkData && (
-                <Form.Item label={linkData.field}>
-                  <Input
-                    readOnly
-                    defaultValue={linkData.value}
-                    value={linkData.value}
-                  />
-                </Form.Item>
-              )}
-              <Button type="primary" onClick={showModal}>
-                edit link
-              </Button>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                marginBottom: "16px",
-              }}
-            >
-              {linkData2 && (
-                <Form.Item label={linkData2.field}>
-                  <Input
-                    readOnly
-                    defaultValue={linkData2.value}
-                    value={linkData2.value}
-                  />
-                </Form.Item>
-              )}
-              <Button type="primary" onClick={showModal}>
-                edit link
-              </Button>
-            </div>
+            {tableMeta
+              .filter((el) => Object.keys(el).includes("tableId"))
+              .map((el, i) => (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <Form.Item label={el.dataIndex}>
+                    <Input
+                      readOnly
+                      value={i === 0 ? linkData1.value : linkData2.value}
+                    />
+                  </Form.Item>
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      setActiveModal(i + 1);
+                      showModal(true);
+                    }}
+                  >
+                    edit link
+                  </Button>
+                </div>
+              ))}
 
             <div style={{ display: "flex", gap: "16px" }}>
               <Button
@@ -221,19 +209,16 @@ export default function RecordCard() {
                   title: "id",
                   dataIndex: "id",
                   key: "id",
-                  onCell,
                 },
                 {
                   title: "Country",
                   dataIndex: "country",
                   key: "country",
-                  onCell,
                 },
                 {
                   title: "Population",
                   dataIndex: "population",
                   key: "population",
-                  onCell,
                 },
               ]}
               dataSource={modalData}

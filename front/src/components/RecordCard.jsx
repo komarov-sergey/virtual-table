@@ -62,6 +62,17 @@ export default function RecordCard() {
                 <Input value={data?.population} readOnly />
               </Form.Item>
             )}
+
+            {data?.link && (
+              <Form.Item label="страна">
+                <Input value={data?.link?.value} readOnly />
+              </Form.Item>
+            )}
+            {data?.link2 && (
+              <Form.Item label="население">
+                <Input value={data?.link2?.value} readOnly />
+              </Form.Item>
+            )}
             <Button
               style={{ alignSelf: "flex-start" }}
               onClick={() => navigate(-1)}

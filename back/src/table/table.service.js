@@ -134,7 +134,6 @@ async function getTableRecord({ recordId }) {
 }
 
 async function addTableRecord({ tableId }, reqBody) {
-  console.log("addTableRecord");
   try {
     // add record
     const [result] = await sequelize.query(
@@ -142,7 +141,23 @@ async function addTableRecord({ tableId }, reqBody) {
       (id, createdat, updatedat, createdby, "data", table_id)
       VALUES('${uuidv4()}', now(), now(), 'admin', '${JSON.stringify(
         reqBody
-      )}', ${tableId})`,
+      )}', ${tableId})`
+      // { logging: console.log }
+    );
+
+    return { result };
+  } catch (e) {
+    return {
+      errors: [e.toString()],
+    };
+  }
+}
+
+async function deleteRecord({ recordId }) {
+  try {
+    // delete record
+    const [result] = await sequelize.query(
+      `DELETE from public.table_data where id='${recordId}'`,
       { logging: console.log }
     );
 
@@ -162,4 +177,5 @@ module.exports = {
   updateTableRecord,
   getTableRecord,
   addTableRecord,
+  deleteRecord,
 };

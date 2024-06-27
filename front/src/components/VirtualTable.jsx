@@ -9,8 +9,6 @@ const VirtualTable = () => {
   const [tableMeta, settableMeta] = useState([]);
   let { tableId } = useParams();
 
-  console.log(tableMeta);
-
   if (!tableId) {
     tableId = "1";
   }
@@ -20,8 +18,8 @@ const VirtualTable = () => {
 
     Promise.all([getData(), getMeta()])
       .then((result) => {
-        settableData(prepareData(result[0]));
         settableMeta(prepareMetaColumns(result[1]));
+        settableData(prepareData(result[0]));
       })
       .finally(() => {
         setIsLading(false);
@@ -50,7 +48,23 @@ const VirtualTable = () => {
     meta.map((el) => {
       // filter example
       if (el.title === "Address") {
+        // el.filters = [
+        //   {
+        //     text: "1",
+        //     value: 1,
+        //   },
+        //   {
+        //     text: "2",
+        //     value: 2,
+        //   },
+        // ];
+
         el.onFilter = (value, record) => record.address.indexOf(value) === 0;
+      }
+
+      if (el.title === "Age") {
+        console.log("Age");
+        el.onFilter = (value, record) => record.age.indexOf(value) === 0;
       }
 
       if (el?.type && el?.type === "boolean") {
@@ -66,24 +80,23 @@ const VirtualTable = () => {
       }
 
       // link example
-      if (el?.title === "Country") {
+      if (el?.title === "Country" && tableId !== "2") {
         return (el.render = (_, record) => {
           console.log({ record });
           console.log({ el });
           return (
-            <a href={`record/${record.link?.recordId}`}>{record.link?.value}</a>
+            <>{record.link?.value}</>
+            // <a href={`record/${record.link?.recordId}`}>
           );
         });
       }
-      if (el?.title === "Population") {
+      if (el?.title === "Population" && tableId !== "2") {
         return (el.render = (_, record) => {
           console.log({ record });
           console.log({ el });
-          return (
-            <a href={`record/${record.link2?.recordId}`}>
-              {record.link2?.value}
-            </a>
-          );
+          return <>{record.link2?.value}</>;
+          // <a href={`record/${record.link2?.recordId}`}>
+          // </a>
         });
       }
 
@@ -98,6 +111,27 @@ const VirtualTable = () => {
           <div style={{ display: "flex", flexDirection: "column" }}>
             <a href={`record/${record?.id}`}>go to card</a>
             <a href={`record/edit/${record?.id}`}>edit</a>
+            <a
+              onClick={() => {
+                console.log("delete", record.id);
+                console.log({ tableData });
+
+                getData().then((result) => {
+                  settableData(prepareData(result));
+                });
+                fetch(`http://localhost:5174/api/table/record/${record.id}`, {
+                  method: "DELETE",
+                })
+                  .then(() => {
+                    getData().then((result) => {
+                      settableData(prepareData(result));
+                    });
+                  })
+                  .catch(() => {});
+              }}
+            >
+              delete
+            </a>
           </div>
         );
       },
@@ -130,7 +164,9 @@ const VirtualTable = () => {
   return (
     <>
       <Button type="primary" style={{ width: "150px" }}>
-        <a href={"record/new"}>Add</a>
+        <a href={"record/new"} style={{ display: "block", width: "100%" }}>
+          Add
+        </a>
       </Button>
       <Table
         columns={tableMeta}

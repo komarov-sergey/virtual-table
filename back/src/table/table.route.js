@@ -6,6 +6,7 @@ const {
   updateTableRecord,
   getTableRecord,
   addTableRecord,
+  deleteRecord,
 } = require("./table.service");
 
 module.exports = new Router()
@@ -77,6 +78,21 @@ module.exports = new Router()
     const reqBody = ctx.request.body;
 
     const dataOrError = await addTableRecord(tableId, reqBody);
+
+    if (!Object.keys(dataOrError).includes("errors")) {
+      ctx.response.status = 200;
+      ctx.body = dataOrError;
+    } else {
+      ctx.response.status = 422;
+      ctx.body = dataOrError;
+    }
+  })
+  .delete("/record/:recordId", async (ctx) => {
+    const {
+      request: { params: recordId },
+    } = ctx;
+
+    const dataOrError = await deleteRecord(recordId);
 
     if (!Object.keys(dataOrError).includes("errors")) {
       ctx.response.status = 200;

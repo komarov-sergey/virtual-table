@@ -15,8 +15,6 @@ export default function RecordCardNew() {
   const [activeModal, setActiveModal] = useState();
   const [tableMeta, setTableMeta] = useState([]);
 
-  console.log({ activeModal });
-
   // modal -->
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -75,7 +73,7 @@ export default function RecordCardNew() {
       .then((result) => setTableMeta(result))
       .catch((error) => console.error(error));
 
-  async function onFinish({ name, age, address, select }) {
+  async function onFinish({ name, age, address }) {
     console.log("onFinish");
 
     const raw = JSON.stringify({
